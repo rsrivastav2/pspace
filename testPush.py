@@ -1,72 +1,51 @@
-// src/BarChart.js
+ output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerows(data)
+    output.seek(0)
+
+    return Response(output.getvalue(), mimetype='text/csv')
+
+npm install papaparse
+
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import Papa from 'papaparse';
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
-// Register chart components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-const BarChart = () => {
-  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function App() {
+  const [data, setData] = useState({ labels: [], datasets: [] });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/data');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Fetched data:', data);  // Log data to console for debugging
+    fetch('http://localhost:5000/data')
+      .then(response => response.text())
+      .then(csvData => {
+        Papa.parse(csvData, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const labels = results.data.map(row => row.Column1);
+            const values = results.data.map(row => row.Column2);
 
-        setChartData({
-          labels: data.labels || [],
-          datasets: [
-            {
-              label: 'My Data',
-              data: data.values || [],
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderColor: 'rgba(75, 192, 192, 1)',
-              borderWidth: 1
-            }
-          ]
+            setData({
+              labels: labels,
+              datasets: [{
+                label: 'Sample Data',
+                data: values,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              }]
+            });
+          }
         });
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      });
   }, []);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div>
-      <h2>Bar Chart</h2>
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'Bar Chart Example',
-            },
-          },
-        }}
-      />
+      <h1>Chart Example</h1>
+      <Line data={data} />
     </div>
   );
-};
+}
 
-export default BarChart;
+export default App;
