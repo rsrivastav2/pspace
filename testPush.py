@@ -12,33 +12,36 @@ const BarChart = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/data')
-      .then(response => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/data');
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return response.json();
-      })
-      .then(data => {
+        const data = await response.json();
+        console.log('Fetched data:', data);  // Log data to console for debugging
+
         setChartData({
-          labels: data.labels,
+          labels: data.labels || [],
           datasets: [
             {
               label: 'My Data',
-              data: data.values,
+              data: data.values || [],
               backgroundColor: 'rgba(75, 192, 192, 0.2)',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1
             }
           ]
         });
-        setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching data:', error);
         setError(error);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   if (loading) return <p>Loading...</p>;
