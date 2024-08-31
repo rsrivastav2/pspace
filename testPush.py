@@ -1,51 +1,17 @@
- output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerows(data)
-    output.seek(0)
-
-    return Response(output.getvalue(), mimetype='text/csv')
-
-npm install papaparse
-
-import React, { useEffect, useState } from 'react';
-import Papa from 'papaparse';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
-
-function App() {
-  const [data, setData] = useState({ labels: [], datasets: [] });
+const [responseText, setResponseText] = useState('');
 
   useEffect(() => {
+    // Replace with your API URL
     fetch('http://localhost:5000/data')
-      .then(response => response.text())
-      .then(csvData => {
-        Papa.parse(csvData, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const labels = results.data.map(row => row.Column1);
-            const values = results.data.map(row => row.Column2);
-
-            setData({
-              labels: labels,
-              datasets: [{
-                label: 'Sample Data',
-                data: values,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              }]
-            });
-          }
-        });
-      });
+      .then(response => response.text()) // Get the response text
+      .then(text => setResponseText(text)) // Save it to state
+      .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   return (
     <div>
-      <h1>Chart Example</h1>
-      <Line data={data} />
+      <h1>Response Text</h1>
+      <pre>{responseText}</pre> {/* Use <pre> to preserve formatting */}
     </div>
   );
 }
-
-export default App;
