@@ -1,5 +1,3 @@
-npm install chart.js react-chartjs-2
-
 // src/BarChart.js
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
@@ -10,10 +8,17 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const BarChart = () => {
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/data')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         setChartData({
           labels: data.labels,
@@ -27,9 +32,17 @@ const BarChart = () => {
             }
           ]
         });
+        setLoading(false);
       })
-      .catch(error => console.error('Error fetching data:', error));
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setError(error);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div>
@@ -54,24 +67,3 @@ const BarChart = () => {
 };
 
 export default BarChart;
-
-
-
-
-/ src/App.js
-import React from 'react';
-import './App.css';
-import BarChart from './BarChart';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Dashboard</h1>
-        <BarChart />
-      </header>
-    </div>
-  );
-}
-
-export default App;
