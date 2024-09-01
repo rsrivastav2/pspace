@@ -15,3 +15,12 @@ const [responseText, setResponseText] = useState('');
     </div>
   );
 }
+
+
+model = Sequential([
+    Dense(10, input_shape=(2,), activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.fit(X, y, epochs=10)
