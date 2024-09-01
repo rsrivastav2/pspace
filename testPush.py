@@ -17,43 +17,43 @@ const [responseText, setResponseText] = useState('');
 }
 
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, LeakyReLU, PReLU, ELU, Dropout
 from tensorflow.keras.optimizers import Adam
-from sklearn.preprocessing import MinMaxScaler
 
-# Load the data
-data = pd.read_csv('path/to/your/data.csv')
+# Sample Data Creation
+np.random.seed(42)
+data_size = 1000
+X = np.random.rand(data_size, 10)  # 10 features
+y = np.random.randint(2, size=data_size)  # Binary classification
 
-# Convert date-related features to numeric if they aren't already
-data['date'] = pd.to_datetime(data[['year', 'month', 'date']])
-data['day_of_week'] = data['date'].dt.dayofweek
-data['day_of_year'] = data['date'].dt.dayofyear
-
-# Drop columns that are no longer needed
-data.drop(columns=['date'], inplace=True)  # Remove 'date' column if not needed
-
-# Define features and target
-X = data[['month', 'year', 'day_of_week', 'day_of_year']]
-y = data['count']
-
-# Split the data
+# Split Data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Normalize/Scale features
-scaler = MinMaxScaler()
+# Feature Scaling
+scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Define the neural network model
+# Build the Model
 model = Sequential([
-    Dense(64, input_dim=X_train_scaled.shape[1], activation='relu'),
-    Dense(32, activation='relu'),
-    Dense(1)  # Output layer for regression
+    Dense(128, input_dim=X_train_scaled.shape[1]),
+    LeakyReLU(alpha=0.01),  # Using Leaky ReLU
+    Dropout(0.5),
+    
+    Dense(64),
+    PReLU(),  # Using PReLU
+    Dropout(0.5),
+    
+    Dense(32),
+    ELU(alpha=1.0),  # Using ELU
+    Dropout(0.5),
+    
+    Dense(1, activation='sigmoid')  # Output layer for binary classification
 ])
 
 # Compile the model
