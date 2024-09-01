@@ -24,6 +24,7 @@ from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
+from sklearn.preprocessing import MinMaxScaler
 
 # Load the data
 data = pd.read_csv('path/to/your/data.csv')
