@@ -40,20 +40,15 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Build the Model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+
 model = Sequential([
-    Dense(128, input_dim=X_train_scaled.shape[1]),
-    LeakyReLU(alpha=0.01),  # Using Leaky ReLU
+    LSTM(128, return_sequences=True, input_shape=(timesteps, features)),
     Dropout(0.5),
-    
-    Dense(64),
-    PReLU(),  # Using PReLU
-    Dropout(0.5),
-    
-    Dense(32),
-    ELU(alpha=1.0),  # Using ELU
-    Dropout(0.5),
-    
-    Dense(1, activation='sigmoid')  # Output layer for binary classification
+    LSTM(64),
+    Dense(32, activation='relu'),
+    Dense(1, activation='sigmoid')  # or 'linear' for regression
 ])
 
 # Compile the model
