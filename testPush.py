@@ -39,3 +39,6 @@ export default MyBarChart;
 
 
 <LabelList dataKey="count" position="top" />
+
+                <XAxis dataKey="date" tickFormatter={(tick) => new Date(tick).toLocaleDateString()} />
+
