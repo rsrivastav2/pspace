@@ -1,9 +1,11 @@
-.chart-image {
-    position: absolute; /* Position the image absolutely */
-    top: 10px; /* Adjust the top position */
-    left: 10px; /* Adjust the left position */
-    width: 50px; /* Adjust width as needed */
+.watermark-image {
+    position: absolute; /* Absolute positioning to overlay the watermark */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Center the watermark */
+    width: 300px; /* Adjust size as needed */
     height: auto; /* Maintain aspect ratio */
-    z-index: 1; /* Ensure the image is above the chart */
+    opacity: 0.2; /* Light transparency */
+    pointer-events: none; /* Allow clicks to pass through the watermark */
+    z-index: 999; /* Ensure the watermark is above other content */
 }
-            <img src="/path/to/your/image.png" alt="Chart Logo" className="chart-image" />
