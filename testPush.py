@@ -1,65 +1,101 @@
-const [responseText, setResponseText] = useState('');
+from flask import Flask, jsonify
 
-  useEffect(() => {
-    // Replace with your API URL
-    fetch('http://localhost:5000/data')
-      .then(response => response.text()) // Get the response text
-      .then(text => setResponseText(text)) // Save it to state
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
+app = Flask(__name__)
 
-  return (
-    <div>
-      <h1>Response Text</h1>
-      <pre>{responseText}</pre> {/* Use <pre> to preserve formatting */}
-    </div>
-  );
+@app.route('/api/data')
+def get_data():
+    # Example data
+    data = [
+        {"date": "2024-01-01", "count": 10},
+        {"date": "2024-02-01", "count": 15},
+        {"date": "2024-03-01", "count": 7}
+    ]
+    return jsonify(data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+Set Up Your React Application:
+
+You’ll need to use a charting library. For simplicity, I'll use recharts, a popular React charting library.
+
+First, install recharts:
+
+bash
+Copy code
+npm install recharts
+Then, create a React component to fetch the data from the Flask API and render the bar chart.
+
+Example React component:
+
+jsx
+Copy code
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import axios from 'axios';
+
+const MyBarChart = () => {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/data')  // Adjust URL if necessary
+            .then(response => {
+                setData(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
+
+    return (
+        <div>
+            <h1>Bar Chart</h1>
+            <BarChart width={600} height={300} data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#8884d8" />
+            </BarChart>
+        </div>
+    );
+};
+
+export default MyBarChart;
+Integrate Your Component:
+
+Make sure you render the MyBarChart component in your application, typically in your App.js or a similar file.
+
+Example App.js:
+
+jsx
+Copy code
+import React from 'react';
+import MyBarChart from './MyBarChart';  // Adjust import path as necessary
+
+function App() {
+    return (
+        <div className="App">
+            <MyBarChart />
+        </div>
+    );
 }
 
+export default App;
+Run Your Applications:
 
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LeakyReLU, PReLU, ELU, Dropout
-from tensorflow.keras.optimizers import Adam
+Start your Flask server (python app.py or similar command).
+Start your React development server (npm start or yarn start).
+Ensure that both applications are running and that your Flask server is accessible from the React application. If they are running on different ports (e.g., Flask on http://localhost:5000 and React on http://localhost:3000), make sure to handle CORS (Cross-Origin Resource Sharing) in your Flask app. You can use the flask-cors library to simplify this:
 
-# Sample Data Creation
-np.random.seed(42)
-data_size = 1000
-X = np.random.rand(data_size, 10)  # 10 features
-y = np.random.randint(2, size=data_size)  # Binary classification
+bash
+Copy code
+pip install flask-cors
+Add CORS support in your Flask app:
 
-# Split Data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+python
+Copy code
+from flask_cors import CORS
 
-# Feature Scaling
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Build the Model
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-
-model = Sequential([
-    LSTM(128, return_sequences=True, input_shape=(timesteps, features)),
-    Dropout(0.5),
-    LSTM(64),
-    Dense(32, activation='relu'),
-    Dense(1, activation='sigmoid')  # or 'linear' for regression
-])
-
-# Compile the model
-model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
-
-# Train the model
-history = model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_split=0.1, verbose=1)
-
-# Evaluate the model
-loss = model.evaluate(X_test_scaled, y_test, verbose=1)
-print(f'Test Loss: {loss}')
-
-# Predict with the model (optional)
-predictions = model.predict(X_test_scaled)
+CORS(app)
+This setup should help you fetch data from your Flask API and display it in a bar chart in your React application. If you have any specific requirements or issues, feel free to ask!
