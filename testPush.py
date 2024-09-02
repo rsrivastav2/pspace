@@ -9,3 +9,5 @@
     pointer-events: none; /* Allow clicks to pass through the watermark */
     z-index: 999; /* Ensure the watermark is above other content */
 }
+<div className="watermark-container">
+            <img src={watermark} alt="Watermark" className="watermark-image" />
