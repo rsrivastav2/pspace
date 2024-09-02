@@ -36,3 +36,6 @@ const MyBarChart = () => {
 };
 
 export default MyBarChart;
+
+
+<LabelList dataKey="count" position="top" />
