@@ -1,30 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Scatter, ScatterChart } from 'recharts';
-import axios from 'axios';
-
-const TrendChart = () => {
-    const [data, setData] = useState([]);
-
-    useEffect(() => {
-        axios.get('http://localhost:5000/api/trend')
-            .then(response => setData(response.data))
-            .catch(error => console.error('Error fetching data:', error));
-    }, []);
-
-    return (
-        <div>
-            <h1>Trend Line Chart</h1>
-            <ScatterChart width={600} height={400}>
+<div className="chart-container">
+            <h1 className="chart-title">Trend Line Chart</h1>
+            <LineChart width={800} height={400} data={data}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="ytest" name="Actual Values" />
-                <YAxis dataKey="ypred" name="Predicted Values" />
+                <XAxis dataKey="index" label={{ value: 'Index', position: 'bottom' }} />
+                <YAxis label={{ value: 'Values', angle: -90, position: 'left' }} />
                 <Tooltip />
                 <Legend />
-                <Scatter name="Data" data={data} fill="#8884d8" />
-                <Line type="monotone" dataKey="ytest" stroke="#ff7300" />
-            </ScatterChart>
+                <Line type="monotone" dataKey="ytest" stroke="#8884d8" dot={false} name="Actual Values" />
+                <Line type="monotone" dataKey="ypred" stroke="#82ca9d" dot={false} name="Predicted Values" />
+            </LineChart>
         </div>
-    );
-};
-
-export default TrendChart;
