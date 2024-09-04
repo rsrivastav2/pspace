@@ -1,25 +1,30 @@
-.container {
-    display: flex; /* Use flexbox for layout */
-    align-items: flex-start; /* Align items to the start of the container */
-    padding: 20px; /* Add padding if needed */
-}
+import React, { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Scatter, ScatterChart } from 'recharts';
+import axios from 'axios';
 
-.chart-container {
-    flex: 1; /* Allow the chart container to take up available space */
-    max-width: 600px; /* Adjust the maximum width of the chart */
-}
-.sidebar {
-    flex: 0 0 auto; /* Prevent the sidebar from growing */
-    margin-right: 20px; /* Add margin to the right of the sidebar */
-}
+const TrendChart = () => {
+    const [data, setData] = useState([]);
 
-.logo-image {
-    width: 150px;  /* Adjust width as needed */
-    height: auto;  /* Maintain aspect ratio */
-    margin-bottom: 20px; /* Add space below the logo */
-}
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/trend')
+            .then(response => setData(response.data))
+            .catch(error => console.error('Error fetching data:', error));
+    }, []);
 
-<div className="container">
-            <div className="sidebar">
-                <img src={logo} alt="Logo" className="logo-image" />
-            </div>
+    return (
+        <div>
+            <h1>Trend Line Chart</h1>
+            <ScatterChart width={600} height={400}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="ytest" name="Actual Values" />
+                <YAxis dataKey="ypred" name="Predicted Values" />
+                <Tooltip />
+                <Legend />
+                <Scatter name="Data" data={data} fill="#8884d8" />
+                <Line type="monotone" dataKey="ytest" stroke="#ff7300" />
+            </ScatterChart>
+        </div>
+    );
+};
+
+export default TrendChart;
