@@ -1,8 +1,8 @@
-rom kubernetes import client, config
+from kubernetes import client, config
 
 def main():
-    # Load kubeconfig from default location (~/.kube/config)
-    config.load_kube_config()
+    # Load kubeconfig from within the cluster
+    config.load_incluster_config()
 
     # Create a Kubernetes API client
     api_instance = client.CoreV1Api()
