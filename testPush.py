@@ -1,5 +1,5 @@
 Perf
-| where ObjectName == "Process" // Filter for process-related data
-| where CounterName == "% Processor Time" // Specify the counter for CPU usage by processes
-| summarize AvgCpuUsage = avg(CounterValue) by InstanceName, bin(TimeGenerated, 5m)
-| project InstanceName, TimeGenerated, AvgCpuUsage
+| where ObjectName == "LogicalDisk" // Filter for disk-related data
+| where CounterName == "% Free Space" // Specify the counter for free space percentage
+| summarize AvgFreeSpace = avg(CounterValue) by InstanceName, bin(TimeGenerated, 1h)
+| project InstanceName, TimeGenerated, AvgFreeSpace
