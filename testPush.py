@@ -1,5 +1,5 @@
 Perf
-| where ObjectName == "LogicalDisk" and CounterName in ("% Free Space", "% Disk Space Used")
-| summarize avg(CounterValue) by bin(TimeGenerated, 1h), Computer, CounterName, InstanceName
-| project TimeGenerated, Computer, InstanceName, CounterName, avg_CounterValue
-| order by TimeGenerated asc
+| where ObjectName == "Process" // Filter for process-related data
+| where CounterName == "% Processor Time" // Specify the counter for CPU usage by processes
+| summarize AvgCpuUsage = avg(CounterValue) by InstanceName, bin(TimeGenerated, 5m)
+| project InstanceName, TimeGenerated, AvgCpuUsage
