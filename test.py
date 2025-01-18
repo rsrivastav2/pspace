@@ -1,51 +1,26 @@
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    data = {'message': 'Hello from Flask!'}
-    return jsonify(data)
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:5000/api/data')
-      .then(response => setData(response.data))
+    // Fetch data from Flask API
+    fetch('http://localhost:5000/api/data')
+      .then(response => response.json())
+      .then(data => setData(data))
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>React and Flask Integration</h1>
-        {data ? <p>{data.message}</p> : <p>Loading...</p>}
-      </header>
+    <div>
+      <h1>Data from Flask API</h1>
+      {data ? (
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
 
 export default App;
-
-
-# app.py
-from flask import Flask, jsonify
-from flask_cors import CORS
-
-app = Flask(__name__)
-CORS(app)  # This enables CORS for all routes
-
-@app.route('/api/hello')
-def hello():
-    return jsonify(message="Hello from Flask!")
-
-if __name__ == '__main__':
-    app.run(port=5000)
