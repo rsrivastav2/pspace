@@ -1,60 +1,49 @@
 import React, { useState, useEffect } from 'react';
 
-function Dropdowns() {
-    const [firstDropdownValue, setFirstDropdownValue] = useState('');
-    const [secondDropdownOptions, setSecondDropdownOptions] = useState([]);
-    
-    // Handle change in first dropdown
-    const handleFirstDropdownChange = (event) => {
-        const selectedValue = event.target.value;
-        setFirstDropdownValue(selectedValue);
-        
-        // Fetch data only if a valid value is selected
-        if (selectedValue) {
-            fetchData(selectedValue);  // Fetch data based on the selected value
-        } else {
-            setSecondDropdownOptions([]); // Clear the second dropdown if no value is selected
-        }
-    };
+const MyComponent = () => {
+  // States for dropdowns and API response
+  const [firstDropdownValue, setFirstDropdownValue] = useState('');
+  const [secondDropdownOptions, setSecondDropdownOptions] = useState([]);
+  
+  // Handle first dropdown change
+  const handleFirstDropdownChange = (event) => {
+    setFirstDropdownValue(event.target.value);
+  };
 
-    // Fetch data for the second dropdown based on the selected value from the first dropdown
-    const fetchData = (selectedValue) => {
-        fetch(`http://localhost:5000/api/data?selected=${selectedValue}`)
-            .then((response) => response.json())
-            .then((data) => {
-                setSecondDropdownOptions(data); // Populate second dropdown with API data
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-                setSecondDropdownOptions([]); // Clear second dropdown in case of error
-            });
-    };
+  // Call API when first dropdown value changes
+  useEffect(() => {
+    if (firstDropdownValue) {
+      // API call with the selected value
+      fetch(`https://your-flask-api.com/endpoint?param=${firstDropdownValue}`)
+        .then((response) => response.json())
+        .then((data) => {
+          // Assuming the response is an array of options for the second dropdown
+          setSecondDropdownOptions(data);
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    }
+  }, [firstDropdownValue]); // Only run the effect when firstDropdownValue changes
 
-    return (
-        <div>
-            {/* First Dropdown */}
-            <select onChange={handleFirstDropdownChange} value={firstDropdownValue}>
-                <option value="">Select an option</option>
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                {/* Add more options here if needed */}
-            </select>
+  return (
+    <div>
+      <select onChange={handleFirstDropdownChange} value={firstDropdownValue}>
+        <option value="">Select Value</option>
+        <option value="value1">Value 1</option>
+        <option value="value2">Value 2</option>
+        <option value="value3">Value 3</option>
+        {/* Add more options here */}
+      </select>
 
-            {/* Second Dropdown */}
-            <select>
-                <option value="">Select result</option>
-                {secondDropdownOptions.length > 0 ? (
-                    secondDropdownOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                            {option.name}
-                        </option>
-                    ))
-                ) : (
-                    <option value="">No results</option>
-                )}
-            </select>
-        </div>
-    );
-}
+      <select>
+        <option value="">Select Response</option>
+        {secondDropdownOptions.map((option, index) => (
+          <option key={index} value={option}>{option}</option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
-export default Dropdowns;
+export default MyComponent;
