@@ -1,74 +1,38 @@
-import React, { useState, useEffect } from 'react';
+from flask import Flask, jsonify, request
+from kubernetes import client, config
 
-function DropdownExample() {
-  const [deployments, setDeployments] = useState([]); // List of deployments for the first dropdown
-  const [firstDropdownValue, setFirstDropdownValue] = useState(''); // Selected value from the first dropdown
-  const [secondDropdownOptions, setSecondDropdownOptions] = useState([]); // Options for the second dropdown
+app = Flask(__name__)
 
-  // Fetch the list of deployments when the component mounts
-  useEffect(() => {
-    const fetchDeployments = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/get-deployments');
-        const data = await response.json();
-        setDeployments(data); // Set the deployments for the first dropdown
-      } catch (error) {
-        console.error("Error fetching deployments:", error);
-      }
-    };
+# Load kubeconfig to authenticate with the AKS cluster
+config.load_kube_config()  # Assumes kubeconfig is set up to access AKS
 
-    fetchDeployments();
-  }, []); // Empty dependency array means this runs once when the component mounts
+@app.route('/get-deployments', methods=['GET'])
+def get_deployments():
+    # Create a Kubernetes API client
+    v1_apps = client.AppsV1Api()
 
-  // Fetch the second dropdown options based on the selected deployment
-  const fetchSecondDropdownOptions = async (firstValue) => {
-    try {
-      const response = await fetch(`http://localhost:5000/get-deployment-details?deployment_name=${firstValue}`);
-      const data = await response.json();
+    # List deployments from all namespaces
+    deployments = v1_apps.list_deployment_for_all_namespaces()
 
-      // Ensure that the response is an array before setting it
-      if (Array.isArray(data)) {
-        setSecondDropdownOptions(data); // Set the second dropdown options
-      } else {
-        setSecondDropdownOptions([]); // If it's not an array, set an empty array
-      }
-    } catch (error) {
-      console.error("Error fetching second dropdown options:", error);
-      setSecondDropdownOptions([]); // Handle error case by setting an empty array
-    }
-  };
+    # Extract deployment names from the response
+    deployment_names = [deployment.metadata.name for deployment in deployments.items]
 
-  const handleFirstDropdownChange = (e) => {
-    const selectedValue = e.target.value;
-    setFirstDropdownValue(selectedValue);
-    fetchSecondDropdownOptions(selectedValue); // Fetch second dropdown options based on the first dropdown value
-  };
+    return jsonify(deployment_names)
 
-  return (
-    <div>
-      <select value={firstDropdownValue} onChange={handleFirstDropdownChange}>
-        <option value="">Select a deployment</option>
-        {deployments.map((deployment, index) => (
-          <option key={index} value={deployment}>
-            {deployment}
-          </option>
-        ))}
-      </select>
+@app.route('/get-deployment-details', methods=['GET'])
+def get_deployment_details():
+    # Get the deployment name from the request
+    deployment_name = request.args.get('deployment_name')
 
-      <select>
-        <option value="">Select an option</option>
-        {Array.isArray(secondDropdownOptions) && secondDropdownOptions.length > 0 ? (
-          secondDropdownOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))
-        ) : (
-          <option value="">No options available</option> // Display if no options
-        )}
-      </select>
-    </div>
-  );
-}
+    # Simulate different second dropdown options based on the selected deployment
+    if deployment_name == "deployment1":
+        second_dropdown_options = ["Detail A", "Detail B", "Detail C"]
+    elif deployment_name == "deployment2":
+        second_dropdown_options = ["Detail D", "Detail E", "Detail F"]
+    else:
+        second_dropdown_options = []
 
-export default DropdownExample;
+    return jsonify(second_dropdown_options)
+
+if __name__ == '__main__':
+    app.run(debug=True)
