@@ -1,38 +1,71 @@
-from flask import Flask, jsonify, request
-from kubernetes import client, config
+import React, { useState, useEffect } from 'react';
 
-app = Flask(__name__)
+function DropdownExample() {
+  const [deployments, setDeployments] = useState([]); // List of deployment names
+  const [firstDropdownValue, setFirstDropdownValue] = useState(''); // Selected deployment
+  const [secondDropdownOptions, setSecondDropdownOptions] = useState([]); // Options for the second dropdown
 
-# Load kubeconfig to authenticate with the AKS cluster
-config.load_kube_config()  # Assumes kubeconfig is set up to access AKS
+  // Fetch deployment names from Flask API when the component mounts
+  useEffect(() => {
+    const fetchDeployments = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/get-deployments');
+        const data = await response.json();
+        setDeployments(data); // Set the deployment names in the first dropdown
+      } catch (error) {
+        console.error("Error fetching deployments:", error);
+      }
+    };
 
-@app.route('/get-deployments', methods=['GET'])
-def get_deployments():
-    # Create a Kubernetes API client
-    v1_apps = client.AppsV1Api()
+    fetchDeployments();
+  }, []); // Empty array to run this once when the component loads
 
-    # List deployments from all namespaces
-    deployments = v1_apps.list_deployment_for_all_namespaces()
+  // Fetch second dropdown options based on the selected deployment name
+  const fetchSecondDropdownOptions = async (selectedDeployment) => {
+    try {
+      const response = await fetch(`http://localhost:5000/get-deployment-details?deployment_name=${selectedDeployment}`);
+      const data = await response.json();
+      setSecondDropdownOptions(data); // Set the second dropdown options
+    } catch (error) {
+      console.error("Error fetching second dropdown options:", error);
+      setSecondDropdownOptions([]); // Set to empty if there's an error
+    }
+  };
 
-    # Extract deployment names from the response
-    deployment_names = [deployment.metadata.name for deployment in deployments.items]
+  // Handle first dropdown selection change
+  const handleFirstDropdownChange = (e) => {
+    const selectedValue = e.target.value;
+    setFirstDropdownValue(selectedValue); // Set selected deployment in state
+    fetchSecondDropdownOptions(selectedValue); // Fetch second dropdown options based on the selection
+  };
 
-    return jsonify(deployment_names)
+  return (
+    <div>
+      {/* First dropdown (deployments) */}
+      <select value={firstDropdownValue} onChange={handleFirstDropdownChange}>
+        <option value="">Select a deployment</option>
+        {deployments.map((deployment, index) => (
+          <option key={index} value={deployment}>
+            {deployment}
+          </option>
+        ))}
+      </select>
 
-@app.route('/get-deployment-details', methods=['GET'])
-def get_deployment_details():
-    # Get the deployment name from the request
-    deployment_name = request.args.get('deployment_name')
+      {/* Second dropdown (dynamic options) */}
+      <select>
+        <option value="">Select an option</option>
+        {secondDropdownOptions.length > 0 ? (
+          secondDropdownOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))
+        ) : (
+          <option value="">No options available</option>
+        )}
+      </select>
+    </div>
+  );
+}
 
-    # Simulate different second dropdown options based on the selected deployment
-    if deployment_name == "deployment1":
-        second_dropdown_options = ["Detail A", "Detail B", "Detail C"]
-    elif deployment_name == "deployment2":
-        second_dropdown_options = ["Detail D", "Detail E", "Detail F"]
-    else:
-        second_dropdown_options = []
-
-    return jsonify(second_dropdown_options)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+export default DropdownExample;
