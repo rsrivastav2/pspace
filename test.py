@@ -1,60 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-const MyComponent = () => {
-  const [firstDropdownValue, setFirstDropdownValue] = useState(""); // State for first dropdown
-  const [secondDropdownData, setSecondDropdownData] = useState([]); // State for second dropdown options
-  const [loading, setLoading] = useState(false); // Loading state
+function DropdownExample() {
+  const [deployments, setDeployments] = useState([]);
+  const [firstDropdownValue, setFirstDropdownValue] = useState('');
+  const [secondDropdownOptions, setSecondDropdownOptions] = useState([]);
 
-  // API call to fetch data for second dropdown
-  const fetchSecondDropdownData = async (value) => {
-    setLoading(true);
+  // Fetch the AKS deployment names when the component loads
+  useEffect(() => {
+    const fetchDeployments = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/get-deployments');
+        const data = await response.json();
+        setDeployments(data); // Update the deployments list
+      } catch (error) {
+        console.error("Error fetching deployments:", error);
+      }
+    };
+
+    fetchDeployments();
+  }, []);
+
+  // Fetch the second dropdown options when the first dropdown value changes
+  const fetchSecondDropdownOptions = async (firstValue) => {
     try {
-      // Replace with your API URL and pass the selected value as a query parameter or in the request body
-      const response = await fetch(`https://api.example.com/data?filter=${value}`);
+      const response = await fetch(`http://localhost:5000/get-dropdown-options?first_value=${firstValue}`);
       const data = await response.json();
-      setSecondDropdownData(data); // Assuming the response is an array of options
+      setSecondDropdownOptions(data); // Update the second dropdown options
     } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching dropdown options:", error);
     }
   };
 
-  // Handle change event for the first dropdown
-  const handleFirstDropdownChange = (event) => {
-    const selectedValue = event.target.value;
+  const handleFirstDropdownChange = (e) => {
+    const selectedValue = e.target.value;
     setFirstDropdownValue(selectedValue);
-    fetchSecondDropdownData(selectedValue); // Fetch new data based on selected value
+    fetchSecondDropdownOptions(selectedValue); // Fetch second dropdown options based on first dropdown selection
   };
 
   return (
     <div>
-      <label htmlFor="first-dropdown">First Dropdown:</label>
-      <select id="first-dropdown" value={firstDropdownValue} onChange={handleFirstDropdownChange}>
-        <option value="">Select an option</option>
-        <option value="option1">Option 1</option>
-        <option value="option2">Option 2</option>
-        <option value="option3">Option 3</option>
-        {/* Add more options as needed */}
+      <select value={firstDropdownValue} onChange={handleFirstDropdownChange}>
+        <option value="">Select a deployment</option>
+        {deployments.map((deployment, index) => (
+          <option key={index} value={deployment}>
+            {deployment}
+          </option>
+        ))}
       </select>
 
-      {loading && <p>Loading...</p>}
-
-      <label htmlFor="second-dropdown">Second Dropdown:</label>
-      <select id="second-dropdown">
+      <select>
         <option value="">Select an option</option>
-        {secondDropdownData.length > 0 ? (
-          secondDropdownData.map((item, index) => (
-            <option key={index} value={item.id}> {/* Assuming 'id' is the value you want to send */}
-              {item.name} {/* Assuming 'name' is the display text */}
-            </option>
-          ))
-        ) : (
-          <option value="">No data available</option>
-        )}
+        {secondDropdownOptions.map((option, index) => (
+          <option key={index} value={option}>
+            {option}
+          </option>
+        ))}
       </select>
     </div>
   );
-};
+}
 
-export default MyComponent;
+export default DropdownExample;
