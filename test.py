@@ -1,16 +1,12 @@
 import subprocess
+import os
 
-def az_login():
-    try:
-        # Run az login interactively
-        result = subprocess.run(['az', 'login'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        # Output the result (successful login details)
-        print("Login successful!")
-        print(result.stdout)
-    except subprocess.CalledProcessError as e:
-        # Handle errors (e.g., failed login)
-        print(f"Error occurred: {e.stderr}")
+# Set up environment variables for service principal authentication
+os.environ['AZURE_CLIENT_ID'] = 'your-client-id'
+os.environ['AZURE_TENANT_ID'] = 'your-tenant-id'
+os.environ['AZURE_CLIENT_SECRET'] = 'your-client-secret'
 
-# Run az login interactively
-az_login()
+command = ["az", "account", "list", "--output", "table"]
+
+result = subprocess.run(command, capture_output=True, text=True)
+print(result.stdout)
