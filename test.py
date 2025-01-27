@@ -1,71 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import subprocess
 
-function DropdownExample() {
-  const [deployments, setDeployments] = useState([]); // List of deployment names
-  const [firstDropdownValue, setFirstDropdownValue] = useState(''); // Selected deployment
-  const [secondDropdownOptions, setSecondDropdownOptions] = useState([]); // Options for the second dropdown
+def az_login_with_sp(client_id, client_secret, tenant_id):
+    try:
+        # Running the az login with a service principal
+        command = [
+            'az', 'login', 
+            '--service-principal', 
+            '--username', client_id,
+            '--password', client_secret, 
+            '--tenant', tenant_id
+        ]
+        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-  // Fetch deployment names from Flask API when the component mounts
-  useEffect(() => {
-    const fetchDeployments = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/get-deployments');
-        const data = await response.json();
-        setDeployments(data); // Set the deployment names in the first dropdown
-      } catch (error) {
-        console.error("Error fetching deployments:", error);
-      }
-    };
+        # Print the standard output (successful login details)
+        print("Service Principal login successful!")
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        # Handle errors (e.g., failed login)
+        print(f"Error occurred: {e.stderr}")
 
-    fetchDeployments();
-  }, []); // Empty array to run this once when the component loads
+# Replace with your actual service principal credentials
+client_id = 'your-client-id'
+client_secret = 'your-client-secret'
+tenant_id = 'your-tenant-id'
 
-  // Fetch second dropdown options based on the selected deployment name
-  const fetchSecondDropdownOptions = async (selectedDeployment) => {
-    try {
-      const response = await fetch(`http://localhost:5000/get-deployment-details?deployment_name=${selectedDeployment}`);
-      const data = await response.json();
-      setSecondDropdownOptions(data); // Set the second dropdown options
-    } catch (error) {
-      console.error("Error fetching second dropdown options:", error);
-      setSecondDropdownOptions([]); // Set to empty if there's an error
-    }
-  };
-
-  // Handle first dropdown selection change
-  const handleFirstDropdownChange = (e) => {
-    const selectedValue = e.target.value;
-    setFirstDropdownValue(selectedValue); // Set selected deployment in state
-    fetchSecondDropdownOptions(selectedValue); // Fetch second dropdown options based on the selection
-  };
-
-  return (
-    <div>
-      {/* First dropdown (deployments) */}
-      <select value={firstDropdownValue} onChange={handleFirstDropdownChange}>
-        <option value="">Select a deployment</option>
-        {deployments.map((deployment, index) => (
-          <option key={index} value={deployment}>
-            {deployment}
-          </option>
-        ))}
-      </select>
-
-      {/* Second dropdown (dynamic options) */}
-      <select>
-        <option value="">Select an option</option>
-        {secondDropdownOptions.length > 0 ? (
-          secondDropdownOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))
-        ) : (
-          <option value="">No options available</option>
-        )}
-      </select>
-    </div>
-  );
-}
-
-export default DropdownExample;
+# Run az login with service principal
+az_login_with_sp(client_id, client_secret, tenant_id)
