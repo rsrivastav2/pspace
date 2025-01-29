@@ -1,7 +1,19 @@
-# Step 2: Set the subscription
-set_subscription_command = [
-    az_path, "account", "set", "--subscription", subscription_id
-]
+const handleButtonClick = async () => {
+    if (!firstDropdownValue || !secondDropdownValue) {
+      alert("Please select values from both dropdowns.");
+      return;
+    }
 
-# Run the set subscription command
-result = subprocess.run(set_subscription_command, capture_output=True, text=True)
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api-endpoint/${firstDropdownValue}/${secondDropdownValue}`,
+        {
+          method: "GET", // or "POST" depending on your API
+        }
+      );
+      const data = await response.json();
+      console.log("API Response:", data);
+    } catch (error) {
+      console.error("Error while calling API:", error);
+    }
+  };
