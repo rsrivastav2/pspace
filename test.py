@@ -1,46 +1,28 @@
-/* styles.css */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+import { useState, useEffect } from "react";
 
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-}
+export default function ProgressBar() {
+  const [progress, setProgress] = useState(0);
 
-.header {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((oldProgress) => {
+        const newProgress = oldProgress + 10;
+        return newProgress >= 100 ? 100 : newProgress;
+      });
+    }, 1000);
 
-.button {
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
+    return () => clearInterval(interval);
+  }, []);
 
-.button:hover {
-  background-color: #0056b3;
-}
-
-@media (max-width: 768px) {
-  .header {
-    font-size: 1.5rem;
-  }
-
-  .button {
-    font-size: 1rem;
-  }
+  return (
+    <div className="w-full max-w-md mx-auto mt-10">
+      <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+        <div
+          className="h-full bg-blue-500 transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+      <p className="text-center mt-2 text-gray-700">{progress}%</p>
+    </div>
+  );
 }
