@@ -1,33 +1,46 @@
-from flask import Flask, jsonify
-from kubernetes import client, config
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-app = Flask(__name__)
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
 
-# Load Kubernetes config (assumes running inside a cluster or kubeconfig is set)
-config.load_kube_config()  # Use config.load_incluster_config() if running inside a cluster
-v1 = client.CoreV1Api()
+.header {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
 
-@app.route('/pod-status/<namespace>/<deployment>', methods=['GET'])
-def get_pod_status(namespace, deployment):
-    try:
-        # Get all pods in the namespace
-        pods = v1.list_namespaced_pod(namespace)
-        
-        # Filter pods belonging to the given deployment
-        pod_status_list = []
-        for pod in pods.items:
-            if deployment in pod.metadata.name:
-                pod_status_list.append({
-                    "pod_name": pod.metadata.name,
-                    "status": pod.status.phase
-                })
-        
-        if not pod_status_list:
-            return jsonify({"error": "No pods found for deployment"}), 404
+.button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
 
-        return jsonify(pod_status_list)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+.button:hover {
+  background-color: #0056b3;
+}
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+@media (max-width: 768px) {
+  .header {
+    font-size: 1.5rem;
+  }
+
+  .button {
+    font-size: 1rem;
+  }
+}
