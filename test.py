@@ -1,28 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-export default function ProgressBar() {
-  const [progress, setProgress] = useState(0);
+export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((oldProgress) => {
-        const newProgress = oldProgress + 10;
-        return newProgress >= 100 ? 100 : newProgress;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const handleSubmit = () => {
+    alert(`Username: ${username}\nPassword: ${password}`);
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto mt-10">
-      <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-        <div
-          className="h-full bg-blue-500 transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-      <p className="text-center mt-2 text-gray-700">{progress}%</p>
+    <div className="flex flex-col items-center p-4">
+      <input
+        type="text"
+        placeholder="Enter username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className="border p-2 mb-2 rounded"
+      />
+      <input
+        type="password"
+        placeholder="Enter password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="border p-2 mb-2 rounded"
+      />
+      <button
+        onClick={handleSubmit}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Show Alert
+      </button>
     </div>
   );
 }
