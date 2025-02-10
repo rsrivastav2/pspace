@@ -1,4 +1,14 @@
-{showForm && (
+<div className="flex flex-col items-center p-4">
+      {!showForm && (
+        <button
+          onClick={handleToggleForm}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Show Login Form
+        </button>
+      )}
+
+      {showForm && (
         <div className="mt-4">
           <input
             type="text"
@@ -20,3 +30,6 @@
           >
             Submit
           </button>
+        </div>
+      )}
+    </div>
