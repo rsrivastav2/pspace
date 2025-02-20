@@ -1,46 +1,40 @@
-from kubernetes import client, config
-from datetime import datetime
+import { useState } from "react";
 
-# Load the Kubernetes configuration (from kubeconfig or in-cluster)
-config.load_kube_config()  # Use config.load_incluster_config() if running inside a cluster
+const DropdownComponent = () => {
+  const [category, setCategory] = useState("");
+  const [subCategories, setSubCategories] = useState([]);
 
-def get_pods_info(namespace=None, deployment_name=None):
-    v1 = client.CoreV1Api()
-    apps_v1 = client.AppsV1Api()
-    
-    # Get all pods in the given namespace
-    pods = v1.list_namespaced_pod(namespace).items
-    
-    pod_details = []
-    
-    for pod in pods:
-        # Get pod metadata
-        pod_name = pod.metadata.name
-        pod_status = pod.status.phase
-        created_at = pod.metadata.creation_timestamp
-        
-        # Convert to readable datetime
-        created_at_str = created_at.strftime('%Y-%m-%d %H:%M:%S') if created_at else "N/A"
+  const options = {
+    fruits: ["Apple", "Banana", "Orange"],
+    vegetables: ["Carrot", "Broccoli", "Spinach"],
+  };
 
-        # Check if the pod belongs to the given deployment
-        if deployment_name:
-            owner_references = pod.metadata.owner_references or []
-            for owner in owner_references:
-                if owner.kind == "ReplicaSet":
-                    # Fetch ReplicaSet details to check its owner (Deployment)
-                    rs = apps_v1.read_namespaced_replica_set(owner.name, namespace)
-                    if rs.metadata.owner_references and rs.metadata.owner_references[0].kind == "Deployment":
-                        if rs.metadata.owner_references[0].name == deployment_name:
-                            pod_details.append((pod_name, pod_status, created_at_str))
-        else:
-            pod_details.append((pod_name, pod_status, created_at_str))
+  const handleCategoryChange = (event) => {
+    const selectedCategory = event.target.value;
+    setCategory(selectedCategory);
+    setSubCategories(options[selectedCategory] || []);
+  };
 
-    return pod_details
+  return (
+    <div>
+      <label>Choose a Category:</label>
+      <select value={category} onChange={handleCategoryChange}>
+        <option value="">Select Category</option>
+        <option value="fruits">Fruits</option>
+        <option value="vegetables">Vegetables</option>
+      </select>
 
-# Example usage:
-namespace = "default"
-deployment_name = "my-deployment"  # Set to None if you want all pods in the namespace
+      <label>Choose a Subcategory:</label>
+      <select disabled={!category}>
+        <option value="">Select Subcategory</option>
+        {subCategories.map((item) => (
+          <option key={item} value={item.toLowerCase()}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
-pods_info = get_pods_info(namespace, deployment_name)
-for name, status, created in pods_info:
-    print(f"Pod: {name}, Status: {status}, Created: {created}")
+export default DropdownComponent;
