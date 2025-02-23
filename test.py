@@ -1,40 +1,38 @@
 import { useState } from "react";
 
-const DropdownComponent = () => {
-  const [category, setCategory] = useState("");
-  const [subCategories, setSubCategories] = useState([]);
-
-  const options = {
-    fruits: ["Apple", "Banana", "Orange"],
-    vegetables: ["Carrot", "Broccoli", "Spinach"],
-  };
-
-  const handleCategoryChange = (event) => {
-    const selectedCategory = event.target.value;
-    setCategory(selectedCategory);
-    setSubCategories(options[selectedCategory] || []);
-  };
+const App = () => {
+  const [firstSelect, setFirstSelect] = useState("adv");
 
   return (
     <div>
-      <label>Choose a Category:</label>
-      <select value={category} onChange={handleCategoryChange}>
-        <option value="">Select Category</option>
-        <option value="fruits">Fruits</option>
-        <option value="vegetables">Vegetables</option>
-      </select>
+      <label>
+        First Select:
+        <select value={firstSelect} onChange={(e) => setFirstSelect(e.target.value)}>
+          <option value="adv">ADV</option>
+          <option value="sw">SW</option>
+        </select>
+      </label>
 
-      <label>Choose a Subcategory:</label>
-      <select disabled={!category}>
-        <option value="">Select Subcategory</option>
-        {subCategories.map((item) => (
-          <option key={item} value={item.toLowerCase()}>
-            {item}
-          </option>
-        ))}
-      </select>
+      <label>
+        Second Select:
+        <select>
+          {firstSelect === "adv" ? (
+            <>
+              <option value="adv1">Advanced 1</option>
+              <option value="adv2">Advanced 2</option>
+              <option value="adv3">Advanced 3</option>
+            </>
+          ) : (
+            <>
+              <option value="sw1">Software 1</option>
+              <option value="sw2">Software 2</option>
+              <option value="sw3">Software 3</option>
+            </>
+          )}
+        </select>
+      </label>
     </div>
   );
 };
 
-export default DropdownComponent;
+export default App;
