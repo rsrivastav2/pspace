@@ -1,1 +1,1 @@
-pip install --target=./dependencies -r requirements.txt
+pip install --target=./dependencies selenium
