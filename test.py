@@ -1,2 +1,1 @@
-import sys
-sys.path.insert(0, "dependencies")
+dependencies_path = os.path.abspath("dependencies")
