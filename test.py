@@ -1,3 +1,4 @@
-@echo off
-"C:\Users\YourName\AppData\Local\Programs\Python\Python311\python.exe" "C:\Users\YourName\Documents\my_script.py"
-pause
+chrome_driver_path = "C:/path/to/chromedriver.exe"
+
+service = Service(executable_path=chrome_driver_path)
+driver = webdriver.Chrome(service=service)
