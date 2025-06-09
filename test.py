@@ -1,43 +1,52 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+.chatbot-container {
+  border: 1px solid #ccc;
+  width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
+}
 
-const PodList = ({ iapValue, deployment }) => {
-  const [pods, setPods] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+.chat-window {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
 
-  useEffect(() => {
-    if (!iapValue || !deployment) return;
+.message {
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
 
-    const fetchPods = async () => {
-      try {
-        const response = await axios.get(
-          `/api/pods/${encodeURIComponent(iapValue)}/${encodeURIComponent(deployment)}`
-        );
-        setPods(response.data);
-      } catch (err) {
-        setError("Failed to fetch pods");
-      } finally {
-        setLoading(false);
-      }
-    };
+.message.user {
+  background-color: #d0f0fd;
+  align-self: flex-end;
+}
 
-    fetchPods();
-  }, [iapValue, deployment]);
+.message.bot {
+  background-color: #e2e2e2;
+  align-self: flex-start;
+}
 
-  if (loading) return <p>Loading pods...</p>;
-  if (error) return <p>{error}</p>;
+.input-area {
+  display: flex;
+  border-top: 1px solid #ccc;
+}
 
-  return (
-    <div>
-      <h3>Pods List</h3>
-      <ul>
-        {pods.map((pod, index) => (
-          <li key={index}>{pod}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+.input-area input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
 
-export default PodList;
+.input-area button {
+  padding: 10px 20px;
+  border: none;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
