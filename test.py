@@ -1,52 +1,59 @@
-.chatbot-container {
-  border: 1px solid #ccc;
-  width: 400px;
-  height: 500px;
-  display: flex;
-  flex-direction: column;
-  font-family: sans-serif;
-  background-color: #f9f9f9;
-}
+import React, { useState } from "react";
+import axios from "axios";
+import "./ChatBot.css"; // optional for styling
 
-.chat-window {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
+const ChatBot = () => {
+  const [messages, setMessages] = useState([
+    { sender: "bot", text: "Hi! How can I help you today?" }
+  ]);
+  const [input, setInput] = useState("");
 
-.message {
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 80%;
-}
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-.message.user {
-  background-color: #d0f0fd;
-  align-self: flex-end;
-}
+    const newMessages = [...messages, { sender: "user", text: input }];
+    setMessages(newMessages);
+    setInput("");
 
-.message.bot {
-  background-color: #e2e2e2;
-  align-self: flex-start;
-}
+    try {
+      const response = await axios.post("/api/chat", { message: input }); // Adjust endpoint
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: response.data.reply }
+      ]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Sorry, something went wrong." }
+      ]);
+    }
+  };
 
-.input-area {
-  display: flex;
-  border-top: 1px solid #ccc;
-}
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") sendMessage();
+  };
 
-.input-area input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  outline: none;
-}
+  return (
+    <div className="chatbot-container">
+      <div className="chat-window">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`message ${msg.sender}`}>
+            {msg.text}
+          </div>
+        ))}
+      </div>
+      <div className="input-area">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="Type a message..."
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+    </div>
+  );
+};
 
-.input-area button {
-  padding: 10px 20px;
-  border: none;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-}
+export default ChatBot;
