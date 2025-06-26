@@ -1,16 +1,5 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime
+AIRFLOW_VERSION=2.9.0
+PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1,2)"
+CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
 
-def my_task():
-    print("Running my task")
-
-with DAG("example_dag",
-         start_date=datetime(2024, 1, 1),
-         schedule_interval='@daily',
-         catchup=False) as dag:
-
-    task = PythonOperator(
-        task_id="print_hello",
-        python_callable=my_task
-    )
+pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
