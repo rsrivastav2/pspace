@@ -1,148 +1,138 @@
-import React from "react";
-import { PieChart, Pie, Cell } from "recharts";
+import React, { useState } from "react";
+import axios from "axios";
 
-const JobDetails = () => {
-  const cpuUsage = 30.5;
-  const memoryUsage = 221;
-  const cpuData = [
-    { name: "Used", value: cpuUsage },
-    { name: "Free", value: 100 - cpuUsage },
-  ];
-  const memData = [
-    { name: "Used", value: memoryUsage },
-    { name: "Free", value: 1000 - memoryUsage },
-  ];
+const ScheduleXApp = () => {
+  const [activeTab, setActiveTab] = useState("jobDetails");
+  const [jobName, setJobName] = useState("");
+  const [dependencies, setDependencies] = useState([]);
 
-  const cardStyle = {
-    border: "1px solid #ccc",
-    borderRadius: "10px",
-    padding: "20px",
-    marginBottom: "20px",
+  const handleForceStart = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/force-start", { jobName });
+      alert(res.data.message || "Job triggered successfully");
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const sectionTitle = {
-    fontWeight: "bold",
-    marginBottom: "10px",
-    textAlign: "center",
-  };
-
-  const pieContainer = {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "10px",
-  };
-
-  const buttonStyle = {
-    marginTop: "10px",
-    padding: "10px 20px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    cursor: "pointer",
+  const handleFetchDependencies = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/dependencies?job=${jobName}`);
+      setDependencies(res.data.dependencies || []);
+    } catch (err) {
+      alert("Error fetching dependencies");
+    }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div style={{ backgroundColor: "#FEF3C7", color: "#92400E", padding: "10px", borderRadius: "10px", marginBottom: "20px" }}>
-        ⚠️ Error: Job Aborted: Manually aborted by user: admin
+    <div style={styles.container}>
+      <h1 style={styles.title}>ScheduleX</h1>
+
+      <div style={styles.tabBar}>
+        <button style={styles.tab(activeTab === "jobDetails")} onClick={() => setActiveTab("jobDetails")}>Job Details</button>
+        <button style={styles.tab(activeTab === "forceStart")} onClick={() => setActiveTab("forceStart")}>Force Start</button>
+        <button style={styles.tab(activeTab === "jobDependencies")} onClick={() => setActiveTab("jobDependencies")}>Job Dependencies</button>
       </div>
 
-      <div style={cardStyle}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div style={styles.content}>
+        {activeTab === "jobDetails" && (
           <div>
-            <div><strong>JOB ID:</strong> jino6d5h202</div>
-            <div><strong>EVENT NAME:</strong> Test Event 2</div>
-            <div><strong>EVENT TIMING:</strong> Disabled</div>
-            <div><strong>CATEGORY NAME:</strong> Test Cat</div>
-            <div><strong>PLUGIN NAME:</strong> Test Plugin</div>
-            <div><strong>EVENT TARGET:</strong> joeretina.local</div>
+            <h2>Job Details</h2>
+            <p>Display job metadata and status here...</p>
           </div>
+        )}
+
+        {activeTab === "forceStart" && (
           <div>
-            <div><strong>JOB SOURCE:</strong> Manual (admin)</div>
-            <div><strong>SERVER HOSTNAME:</strong> joeretina.local</div>
-            <div><strong>PROCESS ID:</strong> 32457</div>
-            <div><strong>JOB STARTED:</strong> Apr 30, 2016 11:07 PM</div>
-            <div><strong>JOB COMPLETED:</strong> Apr 30, 2016 11:07 PM</div>
-            <div><strong>ELAPSED TIME:</strong> 20 seconds</div>
-            <button style={buttonStyle}>Run Again</button>
+            <h2>Force Start a Job</h2>
+            <input
+              style={styles.input}
+              placeholder="Enter job name"
+              value={jobName}
+              onChange={(e) => setJobName(e.target.value)}
+            />
+            <button style={styles.button} onClick={handleForceStart}>Submit</button>
           </div>
-        </div>
-      </div>
+        )}
 
-      <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-        <div style={cardStyle}>
-          <div style={sectionTitle}>Performance Metrics</div>
-          <div style={pieContainer}>
-            <PieChart width={100} height={100}>
-              <Pie
-                data={[{ name: "total", value: 100 }]}
-                cx="50%"
-                cy="50%"
-                innerRadius={30}
-                outerRadius={50}
-                fill="#0000FF"
-                dataKey="value"
-              />
-            </PieChart>
+        {activeTab === "jobDependencies" && (
+          <div>
+            <h2>Fetch Job Dependencies</h2>
+            <input
+              style={styles.input}
+              placeholder="Enter job name"
+              value={jobName}
+              onChange={(e) => setJobName(e.target.value)}
+            />
+            <button style={styles.button} onClick={handleFetchDependencies}>Submit</button>
+
+            {dependencies.length > 0 && (
+              <div style={styles.dependencies}>
+                <h3>Dependencies:</h3>
+                <ul>
+                  {dependencies.map((dep, idx) => <li key={idx}>{dep}</li>)}
+                </ul>
+              </div>
+            )}
           </div>
-        </div>
-
-        <div style={cardStyle}>
-          <div style={sectionTitle}>CPU Usage</div>
-          <div style={pieContainer}>
-            <PieChart width={100} height={100}>
-              <Pie
-                data={cpuData}
-                cx="50%"
-                cy="50%"
-                innerRadius={30}
-                outerRadius={50}
-                dataKey="value"
-              >
-                <Cell fill="#006400" />
-                <Cell fill="#DDDDDD" />
-              </Pie>
-            </PieChart>
-          </div>
-          <div style={{ textAlign: "center", marginTop: "10px" }}>{cpuUsage}% Average</div>
-        </div>
-
-        <div style={cardStyle}>
-          <div style={sectionTitle}>Memory Usage</div>
-          <div style={pieContainer}>
-            <PieChart width={100} height={100}>
-              <Pie
-                data={memData}
-                cx="50%"
-                cy="50%"
-                innerRadius={30}
-                outerRadius={50}
-                dataKey="value"
-              >
-                <Cell fill="#006400" />
-                <Cell fill="#DDDDDD" />
-              </Pie>
-            </PieChart>
-          </div>
-          <div style={{ textAlign: "center", marginTop: "10px" }}>{memoryUsage} MB Average</div>
-        </div>
-      </div>
-
-      <div style={cardStyle}>
-        <div style={sectionTitle}>Job Event Log</div>
-        <pre style={{ backgroundColor: "#F3F4F6", padding: "10px", borderRadius: "6px", overflowX: "auto" }}>
-# Job ID: jino6d5h202
-# Event Title: Test Event 2
-# Hostname: joeretina.local
-# Date/Time: 2016/04/30 23:07:06 (GMT-7)
-Printed this with console.warn, should go to stderr...
-        </pre>
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-          <button style={buttonStyle}>Download Log</button>
-          <button style={buttonStyle}>View Full Log</button>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default JobDetails;
+const styles = {
+  container: {
+    fontFamily: "Arial, sans-serif",
+    maxWidth: "800px",
+    margin: "20px auto",
+    padding: "20px",
+    border: "1px solid #ccc",
+    borderRadius: "10px",
+  },
+  title: {
+    textAlign: "center",
+    color: "#333",
+  },
+  tabBar: {
+    display: "flex",
+    justifyContent: "space-around",
+    marginBottom: "20px",
+  },
+  tab: (isActive) => ({
+    padding: "10px 20px",
+    cursor: "pointer",
+    borderBottom: isActive ? "2px solid blue" : "2px solid transparent",
+    backgroundColor: isActive ? "#f0f8ff" : "#fff",
+    borderRadius: "6px",
+  }),
+  content: {
+    padding: "20px",
+    border: "1px solid #eee",
+    borderRadius: "6px",
+    backgroundColor: "#fafafa",
+  },
+  input: {
+    padding: "10px",
+    width: "100%",
+    marginBottom: "10px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+  },
+  button: {
+    padding: "10px 20px",
+    backgroundColor: "#007BFF",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  dependencies: {
+    marginTop: "20px",
+    backgroundColor: "#f1f1f1",
+    padding: "10px",
+    borderRadius: "6px",
+  },
+};
+
+export default ScheduleXApp;
