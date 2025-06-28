@@ -1,1 +1,1 @@
-ssh-copy-id -i ~/test/id_rsa.pub user@remote_host
+ssh -i C:\path\to\id_rsa user@unix-host
