@@ -1,34 +1,39 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
 import paramiko
 
-# === Connection details ===
-hostname = "your.unix.server"    # e.g., "192.168.1.100" or "10.0.0.5"
-port = 22                        # default SSH port
-username = "your_username"      # remote Unix username
-password = "your_password"      # remote Unix password
+app = Flask(__name__)
+CORS(app)  # Allow cross-origin requests from React
 
-# === Create SSH client ===
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Accept unknown host keys
+# Remote Unix Server Info
+hostname = "10.0.0.5"
+username = "ubuntu"
+password = "your_password"  # Or use SSH key instead
+remote_script = "/home/ubuntu/myscript.sh"
 
-try:
-    # === Connect using username and password ===
-    client.connect(
-        hostname=hostname,
-        port=port,
-        username=username,
-        password=password,
-        timeout=10
-    )
+@app.route("/run-job", methods=["POST"])
+def run_shell_script():
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    print("[+] Connected successfully!")
+    try:
+        ssh.connect(hostname, username=username, password=password)
+        stdin, stdout, stderr = ssh.exec_command(f"bash {remote_script}")
+        output = stdout.read().decode()
+        error = stderr.read().decode()
 
-    # === Run a test command ===
-    stdin, stdout, stderr = client.exec_command("whoami")
-    print("Logged in as:", stdout.read().decode().strip())
+        ssh.close()
+        return jsonify({
+            "status": "success",
+            "output": output,
+            "error": error
+        })
 
-except paramiko.AuthenticationException:
-    print("[-] Authentication failed.")
-except Exception as e:
-    print(f"[-] Connection error: {e}")
-finally:
-    client.close()
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
