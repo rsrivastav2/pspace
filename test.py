@@ -1,1 +1,1 @@
-ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa
+ssh-copy-id -i ~/test/id_rsa.pub user@remote_host
