@@ -1,23 +1,54 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-from unix_trigger import trigger_unix_script
+import subprocess
+import json
 
-scheduler = BackgroundScheduler()
-scheduler.start()
+# Set your parameters
+vm_name = "your-vm-name"
+resource_group = "your-resource-group"
+user_email = "youruser@domain.com"
 
-def schedule_job(job_name, cron_expr):
-    trigger = CronTrigger.from_crontab(cron_expr)
-    scheduler.add_job(
-        trigger_unix_script,
-        trigger=trigger,
-        args=[job_name],
-        id=job_name,
-        replace_existing=True
-    )
-    return f"Scheduled job '{job_name}' with cron '{cron_expr}'"
+def run_command(cmd):
+    print(f"\n[Running] {cmd}")
+    result = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+    if result.returncode != 0:
+        print(f"[Error] {result.stderr}")
+    else:
+        print(result.stdout)
+    return result
 
-def list_scheduled_jobs():
-    return [{
-        'id': job.id,
-        'next_run': str(job.next_run_time)
-    } for job in scheduler.get_jobs()]
+def az_login():
+    run_command("az login")
+
+def install_aad_extension(vm, rg):
+    run_command(f"""
+    az vm extension set \
+        --publisher Microsoft.Azure.ActiveDirectory \
+        --name AADLoginForLinux \
+        --resource-group {rg} \
+        --vm-name {vm}
+    """)
+
+def get_user_object_id(email):
+    result = run_command(f"az ad user show --id {email} --query objectId -o tsv")
+    return result.stdout.strip()
+
+def assign_vm_role(user_id, vm, rg, role="Virtual Machine Administrator Login"):
+    scope_cmd = f"""
+    az vm show --name {vm} --resource-group {rg} --query id -o tsv
+    """
+    vm_id = run_command(scope_cmd).stdout.strip()
+    run_command(f"""
+    az role assignment create \
+        --assignee {user_id} \
+        --role "{role}" \
+        --scope {vm_id}
+    """)
+
+def ssh_into_vm(vm, rg):
+    run_command(f"az ssh vm --name {vm} --resource-group {rg}")
+
+# === MAIN EXECUTION ===
+az_login()
+install_aad_extension(vm_name, resource_group)
+user_id = get_user_object_id(user_email)
+assign_vm_role(user_id, vm_name, resource_group)
+ssh_into_vm(vm_name, resource_group)
