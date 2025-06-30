@@ -52,3 +52,12 @@ try:
         time.sleep(10)
 except (KeyboardInterrupt, SystemExit):
     scheduler.shutdown()
+
+
+cursor.execute("SELECT Name, Age FROM Employees")
+rows = cursor.fetchall()
+
+# Access as list of tuples
+for name, age in rows:
+    print(f"{name} is {age} years old")
+
