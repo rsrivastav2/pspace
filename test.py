@@ -1,1 +1,1 @@
-Get-Service | Where-Object { $_.DisplayName -like "*SQL*" }
+winget install -e --id Microsoft.SQLServer.2022.Express
