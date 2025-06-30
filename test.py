@@ -1,8 +1,11 @@
-$serverName = "localhost"          # Change to your SQL Server name
-$databaseName = "MyNewDatabase"    # Your desired DB name
+# Set variables
+$serverInstance = "localhost"       # Change if needed
+$databaseName = "TestDB_PowerShell"
 
-# SQL Query to create database
-$sql = "CREATE DATABASE [$databaseName]"
+# Create the T-SQL command
+$query = @"
+CREATE DATABASE [$databaseName];
+"@
 
-# Run the query using Invoke-Sqlcmd
-Invoke-Sqlcmd -ServerInstance $serverName -Query $sql
+# Run the SQL command
+Invoke-Sqlcmd -ServerInstance $serverInstance -Query $query
