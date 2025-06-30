@@ -1,1 +1,1 @@
-Start-Service -Name 'MSSQLSERVER'
+Get-Service | Where-Object { $_.DisplayName -like "*SQL*" }
