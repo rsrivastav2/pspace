@@ -1,14 +1,11 @@
-def fetch_jobs(db_path):
-    conn = connect_db(db_path)
+def get_machine_from_jil(job_name):
+    conn = pyodbc.connect(r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=path_to_your_db.accdb;')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT job_name, status, start_time, end_time, duration_minutes FROM Jobs")
-
-    rows = cursor.fetchall()
-
-    print("\n=== Jobs Table ===")
-    for row in rows:
-        print(f"Job: {row.job_name}, Status: {row.status}, "
-              f"Start: {row.start_time}, End: {row.end_time}, Duration (min): {row.duration_minutes}")
-
-    conn.close()
+    cursor.execute("SELECT machine_name FROM JIL WHERE job_name = ?", (job_name,))
+    result = cursor.fetchone()
+    
+    if result:
+        return result[0]
+    else:
+        return None
