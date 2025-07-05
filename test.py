@@ -1,22 +1,15 @@
-import pyodbc
+@app.route('/hold-job', methods=['POST'])
+def hold_job_api():
+    job_name = request.json.get("job_name")
+    if not job_name:
+        return jsonify({"error": "Missing job_name"}), 400
+    hold_job(job_name)
+    return jsonify({"message": f"Job '{job_name}' held successfully"})
 
-DB_PATH = r"your_db_path.accdb"  # replace with your actual path
-
-def get_connection():
-    return pyodbc.connect(
-        rf"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={DB_PATH};"
-    )
-
-def update_job_status(job_name, new_status):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE Jobs SET status = ? WHERE job_name = ?", (new_status, job_name))
-    conn.commit()
-    conn.close()
-    print(f"Job '{job_name}' updated to status: {new_status}")
-
-def hold_job(job_name):
-    update_job_status(job_name, "Held")
-
-def off_hold_job(job_name):
-    update_job_status(job_name, "Ready")
+@app.route('/offhold-job', methods=['POST'])
+def offhold_job_api():
+    job_name = request.json.get("job_name")
+    if not job_name:
+        return jsonify({"error": "Missing job_name"}), 400
+    off_hold_job(job_name)
+    return jsonify({"message": f"Job '{job_name}' released from hold"})
