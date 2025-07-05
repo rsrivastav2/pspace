@@ -1,15 +1,14 @@
-@app.route('/hold-job', methods=['POST'])
-def hold_job_api():
-    job_name = request.json.get("job_name")
-    if not job_name:
-        return jsonify({"error": "Missing job_name"}), 400
-    hold_job(job_name)
-    return jsonify({"message": f"Job '{job_name}' held successfully"})
-
-@app.route('/offhold-job', methods=['POST'])
-def offhold_job_api():
-    job_name = request.json.get("job_name")
-    if not job_name:
-        return jsonify({"error": "Missing job_name"}), 400
-    off_hold_job(job_name)
-    return jsonify({"message": f"Job '{job_name}' released from hold"})
+def get_job_details(job_name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT machine_name, command, status FROM Jobs WHERE job_name = ?", (job_name,))
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result:
+        return {
+            "machine": result[0],
+            "command": result[1],
+            "status": result[2]
+        }
+    return None
