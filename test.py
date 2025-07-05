@@ -1,11 +1,22 @@
-def get_machine_from_jil(job_name):
-    conn = pyodbc.connect(r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=path_to_your_db.accdb;')
-    cursor = conn.cursor()
+import pyodbc
 
-    cursor.execute("SELECT machine_name FROM JIL WHERE job_name = ?", (job_name,))
-    result = cursor.fetchone()
-    
-    if result:
-        return result[0]
-    else:
-        return None
+DB_PATH = r"your_db_path.accdb"  # replace with your actual path
+
+def get_connection():
+    return pyodbc.connect(
+        rf"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={DB_PATH};"
+    )
+
+def update_job_status(job_name, new_status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Jobs SET status = ? WHERE job_name = ?", (new_status, job_name))
+    conn.commit()
+    conn.close()
+    print(f"Job '{job_name}' updated to status: {new_status}")
+
+def hold_job(job_name):
+    update_job_status(job_name, "Held")
+
+def off_hold_job(job_name):
+    update_job_status(job_name, "Ready")
