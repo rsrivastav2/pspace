@@ -15,3 +15,14 @@
         update_job_run_status(job_name, pid, "Running", time.time())
 
         ssh.close()
+
+def update_job_run_status(job_name, pid, status, start_time=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE Jobs
+        SET pid = ?, status = ?, start_time = ?
+        WHERE job_name = ?
+    """, (pid, status, start_time, job_name))
+    conn.commit()
+    conn.close()
