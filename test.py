@@ -1,5 +1,5 @@
-command = f"nohup bash {script_path} > /tmp/{job_name}.log 2>&1 & echo $!"
-    stdin, stdout, stderr = ssh.exec_command(command)
-    pid = stdout.read().decode().strip()
-
-    print(f"[INFO] Remote job started with PID {pid}")
+cursor.execute("""
+    INSERT INTO job_history 
+    (job_name, execution_date, start_time, end_time, duration_minutes, status, remarks)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+""", (job_name, exec_date, start_time, end_time, duration, status, remarks))
