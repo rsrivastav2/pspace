@@ -1,17 +1,20 @@
-stdin, stdout, stderr = ssh.exec_command(kill_cmd)
+remote_cmd = f"echo $$; {command}"
+        stdin, stdout, stderr = ssh.exec_command(remote_cmd)
 
-exit_code = stdout.channel.recv_exit_status()
-err = stderr.read().decode().strip()
-out = stdout.read().decode().strip()
+        # Get shell PID (1st line of output)
+        pid_line = stdout.readline().strip()
+        if pid_line.isdigit():
+            update_job_pid(job_name, pid_line)
+        else:
+            print(f"[WARNING] Could not capture PID from output: '{pid_line}'")
 
-ssh.close()
+        # Read remaining output if needed
+        remaining_output = stdout.read().decode()
+        error_output = stderr.read().decode()
+        exit_code = stdout.channel.recv_exit_status()
 
-if exit_code == 0:
-    print(f"[SUCCESS] PID {pid} killed on '{machine}'. Exit Code: {exit_code}")
-    update_job_as_terminated(job_name)
-else:
-    print(f"[ERROR] Failed to kill PID {pid} on '{machine}'. Exit Code: {exit_code}")
-    if err:
-        print(f"stderr: {err}")
-    if out:
-        print(f"stdout: {out}")
+        ssh.close()
+
+        print(f"[INFO] Job '{job_name}' finished with exit code: {exit_code}")
+        if error_output:
+            print(f"[STDERR] {error_output}")
