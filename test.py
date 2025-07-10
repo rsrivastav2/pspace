@@ -1,13 +1,13 @@
-In high-pressure production environments, especially while resolving incidents related to Kubernetes (AKS) pods and deployments, engineers often need to:
+Our tool solves this by offering a one-click UI interface where users can select the AKS cluster and instantly:
 
-Manually switch clusters and namespaces
+Kill or restart pods
 
-Use kubectl CLI commands repeatedly
+Restart deployments
 
-Collect pod logs for debugging
+View logs
 
-Restart deployments or scale pods urgently
+Fetch certificate/secrets content
 
-Extract certificate data for validation or renewal
+Scale applications with zero CLI dependency
 
-These operations are time-sensitive, prone to human error, and not accessible to less experienced team members or support staff.
+It standardizes, accelerates, and democratizes access to routine Kubernetes operations—reducing downtime and response time during production issues.
