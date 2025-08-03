@@ -1,27 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-function MultiDeploymentControl() {
-  const [deployments, setDeployments] = useState([]);
-  const [selectedDeployments, setSelectedDeployments] = useState([]);
-
-  // Fetch deployments on load
-  useEffect(() => {
-    fetch('http://localhost:5000/deployments')
-      .then(res => res.json())
-      .then(data => setDeployments(data.deployments))
-      .catch(err => console.error(err));
-  }, []);
-
-  // Toggle checkbox selection
-  const toggleDeployment = (deployment) => {
+function MultiDeploymentControl({ deployments, selectedDeployments, setSelectedDeployments }) {
+  const toggleDeployment = (dep) => {
     setSelectedDeployments(prev =>
-      prev.includes(deployment)
-        ? prev.filter(d => d !== deployment)
-        : [...prev, deployment]
+      prev.includes(dep) ? prev.filter(d => d !== dep) : [...prev, dep]
     );
   };
 
-  // Restart selected deployments
   const handleRestart = () => {
     if (selectedDeployments.length === 0) return;
 
@@ -32,9 +17,9 @@ function MultiDeploymentControl() {
         body: JSON.stringify({ deployment: dep, namespace: 'default' })
       })
         .then(res => res.json())
-        .then(data =>
-          alert(`Deployment: ${dep}\nStatus: ${data.status}\nMessage: ${data.output || data.error}`)
-        )
+        .then(data => {
+          alert(`Deployment: ${dep}\nStatus: ${data.status}`);
+        })
         .catch(err => console.error(`Error restarting ${dep}:`, err));
     });
   };
@@ -42,21 +27,24 @@ function MultiDeploymentControl() {
   return (
     <div>
       <h3>Select Deployments to Restart</h3>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {deployments.map(dep => (
-          <li key={dep}>
-            <label>
-              <input
-                type="checkbox"
-                value={dep}
-                checked={selectedDeployments.includes(dep)}
-                onChange={() => toggleDeployment(dep)}
-              />
-              {dep}
-            </label>
-          </li>
-        ))}
-      </ul>
+      {deployments?.length === 0 ? (
+        <p>Loading deployments...</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {deployments.map(dep => (
+            <li key={dep}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedDeployments.includes(dep)}
+                  onChange={() => toggleDeployment(dep)}
+                />
+                {dep}
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
       <button onClick={handleRestart} disabled={selectedDeployments.length === 0}>
         Restart Selected Deployments
       </button>
@@ -65,4 +53,3 @@ function MultiDeploymentControl() {
 }
 
 export default MultiDeploymentControl;
-
