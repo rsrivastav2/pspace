@@ -1,1 +1,1 @@
-paraphrase-MiniLM-L6-v2
+sentence-transformers/all-mpnet-base-v2
